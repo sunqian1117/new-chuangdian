@@ -69,10 +69,10 @@
           <div class="itemValue" style="margin-left: 23px;">{{ areaFive }}</div>
         </div>
 
-        <!-- <div class="itemInfo">
-              <div class="itemName">睡姿</div>
-              <div class="itemValue">{{ pos }}</div>
-            </div> -->
+        <div class="itemInfo" style="padding: 40px 30px;width: 480px;">
+          <div class="itemName">当前睡姿</div>
+          <div class="itemValue" style="margin-left: 23px;">{{ pos || '未检测' }}</div>
+        </div>
 
       </div>
       <div
@@ -176,9 +176,9 @@
           <el-descriptions-item :label="'30-50' + chooseUnit + '压力面积/cm²'" :contentStyle="{ 'min-width': '200px' }">{{
             report.areaFiveThree
           }}</el-descriptions-item>
-          <!-- <el-descriptions-item label="睡姿" :contentStyle="{ 'min-width': '200px' }">{{
-            report.pos
-          }}</el-descriptions-item> -->
+          <el-descriptions-item label="睡姿" :contentStyle="{ 'min-width': '200px' }">{{
+            report.pos || '未检测'
+          }}</el-descriptions-item>
         </el-descriptions>
         <div style="font-size: 32px;color: black;margin-left: 20px;">青岛大学联合研发
           <img :src="qcode" width="60" height="60" />
@@ -897,7 +897,7 @@ export default {
 </style>
 
 <style lang="scss" scoped>
-@import '../../styles/variables.scss';
+@use '../../styles/variables.scss' as *;
 
 
 

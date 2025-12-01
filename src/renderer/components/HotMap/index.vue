@@ -114,7 +114,8 @@ export default {
             ret.labels.forEach((label) => {
                 this.labelContainer.appendChild(label);
             })
-            ret.pos = this.pos 
+            // 使用draw函数返回的睡姿检测结果，如果没有则使用组件内部的pos
+            this.pos = ret.pos || this.pos
             return ret;
         },
     }

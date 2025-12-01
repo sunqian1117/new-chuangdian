@@ -51,7 +51,7 @@ const classObj = computed(() => {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-@import "@/styles/mixin.scss";
+@use "@/styles/mixin.scss" as *;
 
 .app-wrapper {
   @include clearfix;
