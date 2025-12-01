@@ -13,6 +13,13 @@ function formatDate(date) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
+// 睡姿检测配置常量
+const POSTURE_CONFIG = {
+    MIN_PRESSURE_POINTS: 5,    // 最少压力点数量
+    MIN_TOTAL_PRESSURE: 100,   // 最小总压力值
+    SIDE_THRESHOLD: 0.65       // 侧卧判断阈值（一侧压力超过65%判断为侧卧）
+};
+
 /**
  * 检测睡姿 - 根据压力分布检测当前睡姿
  * @param {Array} pressurePoints - 压力点数组，包含x,y坐标和压力值
@@ -20,7 +27,8 @@ function formatDate(date) {
  * @returns {string} 睡姿: '平躺', '左侧卧', '右侧卧', 或 '未检测'
  */
 function detectSleepPosture(pressurePoints, gridWidth = 40) {
-    if (!pressurePoints || pressurePoints.length < 5) {
+    // 检查是否有足够的压力点数据
+    if (!pressurePoints || pressurePoints.length < POSTURE_CONFIG.MIN_PRESSURE_POINTS) {
         return '未检测';
     }
     
@@ -28,23 +36,19 @@ function detectSleepPosture(pressurePoints, gridWidth = 40) {
     const midX = gridWidth / 2; // 中线位置
     let leftPressure = 0;
     let rightPressure = 0;
-    let leftCount = 0;
-    let rightCount = 0;
     let totalPressure = 0;
     
     pressurePoints.forEach(point => {
         totalPressure += point.value;
         if (point.x < midX) {
             leftPressure += point.value;
-            leftCount++;
         } else {
             rightPressure += point.value;
-            rightCount++;
         }
     });
     
-    // 如果没有足够的压力数据
-    if (totalPressure < 100 || pressurePoints.length < 5) {
+    // 如果总压力值太低，无法准确判断
+    if (totalPressure < POSTURE_CONFIG.MIN_TOTAL_PRESSURE) {
         return '未检测';
     }
     
@@ -52,12 +56,10 @@ function detectSleepPosture(pressurePoints, gridWidth = 40) {
     const leftRatio = leftPressure / totalPressure;
     const rightRatio = rightPressure / totalPressure;
     
-    // 判断睡姿的阈值
-    const sideThreshold = 0.65; // 如果一侧压力超过65%，认为是侧卧
-    
-    if (leftRatio > sideThreshold) {
+    // 根据阈值判断睡姿
+    if (leftRatio > POSTURE_CONFIG.SIDE_THRESHOLD) {
         return '左侧卧';
-    } else if (rightRatio > sideThreshold) {
+    } else if (rightRatio > POSTURE_CONFIG.SIDE_THRESHOLD) {
         return '右侧卧';
     } else {
         return '平躺';
