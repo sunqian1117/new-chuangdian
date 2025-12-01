@@ -12,6 +12,57 @@ function formatDate(date) {
     const seconds = ('0' + date.getSeconds()).slice(-2);
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+/**
+ * 检测睡姿 - 根据压力分布检测当前睡姿
+ * @param {Array} pressurePoints - 压力点数组，包含x,y坐标和压力值
+ * @param {number} gridWidth - 网格宽度 (默认40)
+ * @returns {string} 睡姿: '平躺', '左侧卧', '右侧卧', 或 '未检测'
+ */
+function detectSleepPosture(pressurePoints, gridWidth = 40) {
+    if (!pressurePoints || pressurePoints.length < 5) {
+        return '未检测';
+    }
+    
+    // 计算左右两侧的压力分布
+    const midX = gridWidth / 2; // 中线位置
+    let leftPressure = 0;
+    let rightPressure = 0;
+    let leftCount = 0;
+    let rightCount = 0;
+    let totalPressure = 0;
+    
+    pressurePoints.forEach(point => {
+        totalPressure += point.value;
+        if (point.x < midX) {
+            leftPressure += point.value;
+            leftCount++;
+        } else {
+            rightPressure += point.value;
+            rightCount++;
+        }
+    });
+    
+    // 如果没有足够的压力数据
+    if (totalPressure < 100 || pressurePoints.length < 5) {
+        return '未检测';
+    }
+    
+    // 计算左右压力比例
+    const leftRatio = leftPressure / totalPressure;
+    const rightRatio = rightPressure / totalPressure;
+    
+    // 判断睡姿的阈值
+    const sideThreshold = 0.65; // 如果一侧压力超过65%，认为是侧卧
+    
+    if (leftRatio > sideThreshold) {
+        return '左侧卧';
+    } else if (rightRatio > sideThreshold) {
+        return '右侧卧';
+    } else {
+        return '平躺';
+    }
+}
 //绘制一帧数据
 export function draw(data) {
     let calRet = {
@@ -29,6 +80,8 @@ export function draw(data) {
         avgPress: 0,
         //要显示 Lable 
         labels: [],
+        //睡姿
+        pos: '未检测',
     }
     let maxOri = 0
     let perFrameCalData = []
@@ -161,6 +214,9 @@ export function draw(data) {
         const img = this.context.getImageData(0, 0, DrawCfg.Canvas.width, DrawCfg.Canvas.height)
         resizeImageDataAndSave(img, 224, 224)
     }
+
+    // 检测睡姿
+    calRet.pos = detectSleepPosture(arr)
 
     return calRet
 }
